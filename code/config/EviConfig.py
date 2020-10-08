@@ -170,8 +170,8 @@ class EviConfig(object):
 		self.test_len = self.data_test_word.shape[0]
 		assert(self.test_len==len(self.test_file))
 
-
-		self.test_index = json.load(open(prefix+"_index.json"))
+		self.test_index = [i for i in range(0, self.test_len)]
+		# self.test_index = json.load(open(prefix+"_index.json"))
 
 
 		self.total_evidence_recall = 0

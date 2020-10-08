@@ -4,7 +4,8 @@ import json
 from nltk.tokenize import WordPunctTokenizer
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--in_path', type = str, default =  "../data")
+parser.add_argument('--in_path', type = str, default =  
+os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data'))
 parser.add_argument('--out_path', type = str, default = "prepro_data")
 
 args = parser.parse_args()
@@ -186,7 +187,7 @@ def init(data_file_name, rel2id, max_length = 512, is_training = True, suffix=''
 
 
 
-init(train_distant_file_name, rel2id, max_length = 512, is_training = True, suffix='')
+# init(train_distant_file_name, rel2id, max_length = 512, is_training = True, suffix='')
 init(train_annotated_file_name, rel2id, max_length = 512, is_training = False, suffix='_train')
 init(dev_file_name, rel2id, max_length = 512, is_training = False, suffix='_dev')
 init(test_file_name, rel2id, max_length = 512, is_training = False, suffix='_test')

@@ -1,0 +1,5 @@
+prepro_data/
+data/
+log/
+*.pyc
+.vscode/

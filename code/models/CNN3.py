@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
 
+
 class CNN3(nn.Module):
 	def __init__(self, config):
 		super(CNN3, self).__init__()
