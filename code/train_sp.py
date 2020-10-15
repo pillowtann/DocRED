@@ -33,7 +33,18 @@ model = {
 }
 
 con = config.Config(args)
-con.set_max_epoch(200)
+
+# limited gpu ram
+con.set_batch_size(10)
+# run only 3 rounds
+con.set_max_epoch(5)
+# run in x number of epoch
+# con.set_test_epoch(1)
+# use the whole dataset
+con.set_train_batches(None)
+# load previous model
+con.set_pretrain_model(os.path.join('./checkpoint', args.save_name))
+
 con.load_train_data()
 con.load_test_data()
 # con.set_train_model()
