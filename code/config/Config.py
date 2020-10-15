@@ -64,7 +64,6 @@ class Config(object):
 		self.test_epoch = 5
 		self.pretrain_model = None
 
-
 		self.word_size = 100
 		self.epoch_range = None
 		self.cnn_drop_prob = 0.5  # for cnn
@@ -73,6 +72,7 @@ class Config(object):
 		self.period = 50
 
 		self.batch_size = 40
+		self.train_batches = None
 		self.h_t_limit = 1800
 
 		self.test_batch_size = self.batch_size
@@ -131,6 +131,8 @@ class Config(object):
 		self.use_gpu = use_gpu
 	def set_epoch_range(self, epoch_range):
 		self.epoch_range = epoch_range
+	def set_train_batches(self, train_batches):
+		self.train_batches = train_batches
 	
 	def load_train_data(self):
 		print("Reading training data...")
@@ -149,7 +151,10 @@ class Config(object):
 		assert(self.train_len==len(self.train_file))
 
 		self.train_order = list(range(ins_num))
-		self.train_batches = ins_num // self.batch_size
+
+		if self.train_batches==None:
+			self.train_batches = ins_num // self.batch_size
+
 		if ins_num % self.batch_size != 0:
 			self.train_batches += 1
 
@@ -424,6 +429,7 @@ class Config(object):
 
 		ori_model = model_pattern(config = self)
 		if self.pretrain_model != None:
+			print("Loading pretrained model...")
 			ori_model.load_state_dict(torch.load(self.pretrain_model))
 		ori_model.cuda()
 		model = nn.DataParallel(ori_model)
