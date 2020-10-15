@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import random
 import json
 from nltk.tokenize import WordPunctTokenizer
 import argparse
@@ -25,10 +26,14 @@ json.dump(id2rel, open(os.path.join(out_path, 'id2rel.json'), "w"))
 fact_in_train = set([])
 fact_in_dev_train = set([])
 
-def init(data_file_name, rel2id, max_length = 512, is_training = True, suffix=''):
+def init(data_file_name, rel2id, max_length = 512, is_training = True, suffix='', shorten_data = False, max_samples = 1500):
 
 	ori_data = json.load(open(data_file_name))
 
+	if shorten_data:
+		ori_data = ori_data[0:max_samples]
+		random.seed(123)
+		random.shuffle(ori_data)
 
 	Ma = 0
 	Ma_e = 0
@@ -143,6 +148,7 @@ def init(data_file_name, rel2id, max_length = 512, is_training = True, suffix=''
 	ner2id = json.load(open(os.path.join(out_path, "ner2id.json")))
 
 	sen_tot = len(ori_data)
+	sen_idx = np.zeros((sen_tot, max_length), dtype = np.int64)
 	sen_word = np.zeros((sen_tot, max_length), dtype = np.int64)
 	sen_pos = np.zeros((sen_tot, max_length), dtype = np.int64)
 	sen_ner = np.zeros((sen_tot, max_length), dtype = np.int64)
@@ -151,6 +157,7 @@ def init(data_file_name, rel2id, max_length = 512, is_training = True, suffix=''
 	for i in range(len(ori_data)):
 		item = ori_data[i]
 		words = []
+		sen_idx
 		for sent in item['sents']:
 			words += sent
 
@@ -188,8 +195,8 @@ def init(data_file_name, rel2id, max_length = 512, is_training = True, suffix=''
 
 
 # init(train_distant_file_name, rel2id, max_length = 512, is_training = True, suffix='')
-init(train_annotated_file_name, rel2id, max_length = 512, is_training = False, suffix='_train')
-init(dev_file_name, rel2id, max_length = 512, is_training = False, suffix='_dev')
-init(test_file_name, rel2id, max_length = 512, is_training = False, suffix='_test')
+init(train_annotated_file_name, rel2id, max_length = 512, is_training = False, suffix='_train', shorten_data = False, max_samples = 200)
+init(dev_file_name, rel2id, max_length = 512, is_training = False, suffix='_dev', shorten_data = False, max_samples = 50)
+init(test_file_name, rel2id, max_length = 512, is_training = False, suffix='_test', shorten_data = False, max_samples = 50)
 
 
