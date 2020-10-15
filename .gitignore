@@ -3,3 +3,6 @@ data/
 log/
 *.pyc
 .vscode/
+fig_result/
+checkpoint/
+results_summary.xlsx
