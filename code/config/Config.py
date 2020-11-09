@@ -679,24 +679,34 @@ class Config(object):
 		correct = 0
 		w = 0
 
+		rel_result = {k:{
+			'pr_x':pr_x,
+			'pr_y':pr_y,
+			'correct':correct,
+			'correct_in_train':correct,
+			'w': w
+		} for k in self.rel2id.keys()}
+		export_results = {k:None for k in self.rel2id.keys()}
+
 		if total_recall == 0:
 			total_recall = 1  # for test
 
 		for i, item in enumerate(test_result):
+
 			correct += item[0]
 			pr_y.append(float(correct) / (i + 1))
 			pr_x.append(float(correct) / total_recall)
+
 			if item[1] > input_theta:
 				w = i
-
 
 		pr_x = np.asarray(pr_x, dtype='float32')
 		pr_y = np.asarray(pr_y, dtype='float32')
 		f1_arr = (2 * pr_x * pr_y / (pr_x + pr_y + 1e-20))
 		f1 = f1_arr.max()
 		f1_pos = f1_arr.argmax()
-		theta = test_result[f1_pos][1]
 
+		theta = test_result[f1_pos][1]
 		if input_theta==-1:
 			w = f1_pos
 			input_theta = theta
@@ -722,30 +732,49 @@ class Config(object):
 		pr_y = []
 		correct = correct_in_train = 0
 		w = 0
+
 		for i, item in enumerate(test_result):
+			
+			rel = item[4]
+			
 			correct += item[0]
+			rel_result[rel]['correct'] += item[0]
+
 			if item[0] & item[2]:
 				correct_in_train += 1
+				rel_result[rel]['correct_in_train'] += 1
 			if correct_in_train==correct:
 				p = 0
 			else:
 				p = float(correct - correct_in_train) / (i + 1 - correct_in_train)
 			pr_y.append(p)
+			rel_result[rel]['pr_y'].append(p)
 			pr_x.append(float(correct) / total_recall)
+			rel_result[rel]['pr_x'].append(float(correct) / total_recall)
 			if item[1] > input_theta:
 				w = i
+				rel_result[rel]['w'] = i
 
 		pr_x = np.asarray(pr_x, dtype='float32')
 		pr_y = np.asarray(pr_y, dtype='float32')
 		f1_arr = (2 * pr_x * pr_y / (pr_x + pr_y + 1e-20))
 		f1 = f1_arr.max()
 
+		for rel in rel_result.keys():
+			rel_result[rel]['pr_x'] = np.asarray(rel_result[rel]['pr_x'], dtype='float32')
+			rel_result[rel]['pr_y'] = np.asarray(rel_result[rel]['pr_y'], dtype='float32')
+			rel_result[rel]['f1_arr'] = (2 * rel_result[rel]['pr_x'] * rel_result[rel]['pr_y'] / (rel_result[rel]['pr_x'] + rel_result[rel]['pr_y'] + 1e-20))
+			export_results[rel] = rel_result[rel]['f1_arr'].max()
+
+		print(export_results)
+		with open(model_name+'_test_out.txt', 'w') as f:
+			f.write(json.dumps(export_results))
+
 		auc = sklearn.metrics.auc(x = pr_x, y = pr_y)
 
 		logging('Ignore ma_f1 {:3.4f} | input_theta {:3.4f} test_result F1 {:3.4f} | AUC {:3.4f}'.format(f1, input_theta, f1_arr[w], auc))
-
+		
 		return f1, auc, pr_x, pr_y
-
 
 
 	def testall(self, model_pattern, model_name, input_theta):#, ignore_input_theta):
