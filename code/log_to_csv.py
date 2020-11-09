@@ -4,7 +4,7 @@ import pandas as pd
 import re
 
 # point to log path for processing summary table
-log_path = "./log/CNN3"
+log_path = "./backup/log/CNN3-base"
 # refer to Config or EviConfig "self.period"; Default is 50
 period = 50
 
@@ -60,4 +60,6 @@ summary_df = pd.DataFrame(
      float(test_df.iloc[-1]['f1']),
      float(test_df.iloc[-1]['AUC'])]],
     columns=['Train Time', 'Ign F1', 'Ign AUC', 'F1', 'AUC'])
+
+print(test_df)
 print(summary_df)

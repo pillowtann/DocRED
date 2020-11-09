@@ -73,6 +73,7 @@ class Config(object):
 
 		self.batch_size = 40
 		self.train_batches = None
+		self.limit_first_x_epoch_iters = None
 		self.h_t_limit = 1800
 
 		self.test_batch_size = self.batch_size
@@ -133,6 +134,8 @@ class Config(object):
 		self.epoch_range = epoch_range
 	def set_train_batches(self, train_batches):
 		self.train_batches = train_batches
+	def set_limit_train_batches(self, limit_first_x_epoch_iters):
+		self.limit_first_x_epoch_iters = limit_first_x_epoch_iters
 	
 	def load_train_data(self):
 		print("Reading training data...")
@@ -465,13 +468,24 @@ class Config(object):
 		plt.title('Precision-Recall')
 		plt.grid(True)
 
+		_store_train_batches = self.train_batches
+
 		for epoch in range(self.max_epoch):
 
 			self.acc_NA.clear()
 			self.acc_not_NA.clear()
 			self.acc_total.clear()
 
-			for data in self.get_train_batch():
+			if self.limit_first_x_epoch_iters is not None:
+				if epoch < self.max_epoch*self.limit_first_x_epoch_iters:
+					# set if first few rounds, don't use full data
+					# self.train_batches = self.train_batches
+					pass
+				else:
+					# if later rounds use full data
+					self.train_batches = _store_train_batches
+
+			for counter, data in enumerate(self.get_train_batch()):
 
 				context_idxs = data['context_idxs']
 				context_pos = data['context_pos']
@@ -522,11 +536,10 @@ class Config(object):
 				if global_step % self.period == 0 :
 					cur_loss = total_loss / self.period
 					elapsed = time.time() - start_time
+					print('number of train batches {:2d}'.format(counter))
 					logging('| epoch {:2d} | step {:4d} |  ms/b {:5.2f} | train loss {:5.3f} | NA acc: {:4.2f} | not NA acc: {:4.2f}  | tot acc: {:4.2f} '.format(epoch, global_step, elapsed * 1000 / self.period, cur_loss, self.acc_NA.get(), self.acc_not_NA.get(), self.acc_total.get()))
 					total_loss = 0
 					start_time = time.time()
-
-
 
 			if (epoch+1) % self.test_epoch == 0:
 				logging('-' * 89)
@@ -555,6 +568,7 @@ class Config(object):
 		print("Finish storing")
 
 	def test(self, model, model_name, output=False, input_theta=-1):
+
 		data_idx = 0
 		eval_start_time = time.time()
 		# test_result_ignore = []
@@ -651,6 +665,7 @@ class Config(object):
 		# test_result_ignore.sort(key=lambda x: x[1], reverse=True)
 		test_result.sort(key = lambda x: x[1], reverse=True)
 
+		#print(test_result)
 		print ('total_recall', total_recall)
 		# plt.xlabel('Recall')
 		# plt.ylabel('Precision')

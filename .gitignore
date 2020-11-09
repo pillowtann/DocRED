@@ -7,3 +7,7 @@ fig_result/
 checkpoint/
 results_summary.xlsx
 aws step-by-step.txt
+batch testing commands.txt
+*.sh
+*.xlsx
+*.json
